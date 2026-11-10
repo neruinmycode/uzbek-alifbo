@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#eff3ed" />
+  <meta name="description" content="Eski lotin yoki kirill yozuvidagi o‘zbekcha matnni 2026-yilda qabul qilingan yangi lotin alifbosiga o‘tkazing. Bepul va xavfsiz konverter." />
+  <title>Alifbo — Yangi o‘zbek alifbosi konverteri</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #15352d;
+      --ink-muted: #5c6f66;
+      --line: #d9e2d8;
+      --surface: #fff;
+      --background: #f3f6f1;
+      --green: #174837;
+      --mint: #dbf6ca;
+      --lime: #dafa9c;
+      --shadow: 0 22px 70px rgba(21,53,45,.075);
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin:0; color:var(--ink); background:var(--background); font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; -webkit-font-smoothing:antialiased; }
+    button, textarea { font: inherit; }
+    button { cursor:pointer; }
+    button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visible { outline:3px solid #80bb58; outline-offset:3px; }
+    a { color:inherit; }
+    .container { width:min(1160px, calc(100% - 48px)); margin:0 auto; }
+    .header { height:84px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #dce6db; }
+    .brand { display:flex; align-items:center; gap:12px; text-decoration:none; font-size:23px; font-weight:800; letter-spacing:-1px; }
+    .brand-mark { width:39px; height:39px; display:grid; place-items:center; color:#f5ffe8; background:var(--green); border-radius:12px; font-size:25px; font-weight:750; line-height:1; }
+    .nav { display:flex; gap:28px; align-items:center; }
+    .nav a { text-decoration:none; font-size:14px; font-weight:650; color:#50665c; }
+    .nav a:hover { color:var(--green); }
+    .nav-pill { border:1px solid #cbdbca; border-radius:999px; padding:10px 17px; background:#ffffffad; }
+    .hero { position:relative; display:grid; grid-template-columns: 1fr 290px; align-items:center; gap:20px; padding:73px 0 57px; overflow:hidden; }
+    .hero-content { position:relative; z-index:1; }
+    .eyebrow { display:inline-flex; align-items:center; gap:9px; font-size:12px; font-weight:800; letter-spacing:.9px; text-transform:uppercase; color:#316248; }
+    .eyebrow .tiny-dot { display:inline-block; width:8px; height:8px; border-radius:50%; background:#6da752; box-shadow:0 0 0 4px #deedcf; }
+    h1 { margin:19px 0 20px; font-size:clamp(40px,5vw,65px); line-height:1.08; letter-spacing:-3.7px; font-weight:820; max-width:790px; }
+    h1 .accent { color:#5a9369; }
+    .lead { margin:0; max-width:610px; color:var(--ink-muted); line-height:1.8; font-size:16px; }
+    .hero-art { height:242px; position:relative; display:flex; align-items:center; justify-content:center; }
+    .art-circle { height:235px; width:235px; background:var(--mint); display:flex; align-items:center; justify-content:center; border-radius:50%; transform:rotate(-9deg); position:relative; }
+    .art-circle::after { content:""; border:1.5px dashed #a2cd92; border-radius:50%; position:absolute; inset:14px; }
+    .art-letter { font-family:Georgia,serif; font-weight:700; font-size:155px; line-height:1; color:#235b43; transform:rotate(9deg) translateY(-7px); }
+    .float-letter { position:absolute; display:grid; place-items:center; font-family:Georgia,serif; font-weight:700; background:#fff; border:1px solid #dcebd5; box-shadow:0 10px 20px #17483712; border-radius:16px; }
+    .float-a { width:66px; height:66px; font-size:45px; top:3px; right:8px; transform:rotate(13deg); }
+    .float-b { width:61px; height:61px; font-size:41px; bottom:-4px; left:0px; transform:rotate(-12deg); }
+    .float-c { width:54px; height:54px; font-size:36px; right:0; bottom:1px; transform:rotate(10deg); }
+    .converter-wrap { position:relative; }
+    .converter { background:var(--surface); border:1px solid #e2e9df; border-radius:24px; padding:26px; box-shadow:var(--shadow); }
+    .converter-top { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; column-gap:16px; row-gap:15px; margin-bottom:21px; }
+    .section-heading { font-size:19px; letter-spacing:-.5px; font-weight:800; margin:0; }
+    .live-tag { display:inline-flex; gap:7px; align-items:center; font-size:12px; font-weight:700; color:#386849; background:#eef8e7; padding:9px 12px; border-radius:999px; }
+    .live-tag i { width:7px; height:7px; border-radius:50%; background:#45a667; }
+    .tab-row { display:flex; gap:6px; padding:5px; background:#f2f5f1; border:1px solid #e2eae0; border-radius:13px; margin-bottom:20px; max-width:100%; overflow-x:auto; scrollbar-width:none; }
+    .tab-row::-webkit-scrollbar { display:none; }
+    .tab { white-space:nowrap; flex:1; border:0; background:transparent; color:#566c60; font-weight:690; padding:11px 16px; border-radius:9px; font-size:13px; transition:background .15s,color .15s,box-shadow .15s; }
+    .tab[aria-selected="true"] { background:#174837; color:#fff; box-shadow:0 4px 10px #17483722; }
+    .tab:hover:not([aria-selected="true"]) { background:#e6ede4; }
+    .editor-grid { display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
+    .editor { border:1px solid #dce6db; border-radius:15px; background:#fff; min-width:0; overflow:hidden; transition:border-color .18s; }
+    .editor:focus-within { border-color:#7fae7d; }
+    .editor.result { background:#f8fbf6; }
+    .editor-head { display:flex; align-items:center; justify-content:space-between; gap:8px; min-height:55px; padding:14px 17px; border-bottom:1px solid #e7ede5; }
+    .editor-label { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:750; }
+    .editor-label .round-dot { background:#d9f6b4; width:8px; height:8px; border-radius:50%; }
+    .toolbar { display:flex; align-items:center; gap:7px; }
+    .tool-btn { border:0; background:transparent; color:#607269; border-radius:7px; font-size:12px; font-weight:670; display:flex; gap:6px; align-items:center; padding:8px 9px; }
+    .tool-btn:hover { background:#edf3e9; color:#164c34; }
+    .tool-btn svg { width:15px; height:15px; stroke-width:1.85; }
+    textarea { display:block; width:100%; border:0; background:transparent; outline:0; padding:20px; resize:vertical; min-height:230px; color:#1d3830; font-size:16px; line-height:1.85; letter-spacing:.08px; }
+    textarea:focus-visible { outline:0; }
+    textarea::placeholder { color:#98a69d; }
+    textarea[readonly] { cursor:text; color:#204f39; }
+    .editor-foot { min-height:47px; padding:11px 18px; display:flex; align-items:center; justify-content:space-between; color:#819184; font-size:12px; border-top:1px solid #e8eee7; }
+    .editor-foot strong { font-weight:700; color:#5b7566; }
+    .success { color:#28854e; font-weight:750; }
+    .converter-actions { display:flex; justify-content:space-between; align-items:center; gap:18px; flex-wrap:wrap; margin-top:19px; }
+    .privacy { color:#6b8173; display:flex; align-items:center; gap:8px; font-size:12px; font-weight:540; }
+    .privacy svg { height:17px; width:17px; stroke:#50885c; flex-shrink:0; }
+    .right-actions { display:flex; gap:9px; align-items:center; }
+    .action { border:1px solid #d7e4d5; border-radius:11px; padding:12px 17px; font-size:13px; display:inline-flex; align-items:center; justify-content:center; gap:9px; font-weight:750; min-height:43px; transition:background .15s, transform .15s; }
+    .action:hover { transform:translateY(-1px); }
+    .action svg { height:17px; width:17px; }
+    .action.secondary { color:var(--green); background:white; }
+    .action.secondary:hover { background:#f1f8ec; }
+    .action.primary { background:var(--green); color:white; border-color:var(--green); }
+    .action.primary:hover { background:#256448; }
+    .examples { display:flex; align-items:center; gap:12px; margin:19px 2px 0; flex-wrap:wrap; }
+    .examples-label { color:#6b7c6d; font-size:12px; font-weight:730; }
+    .example { padding:9px 13px; border:1px solid #d4e1d2; border-radius:999px; background:#eaf1e8; color:#3a5948; font-size:12px; font-weight:650; }
+    .example:hover { background:#dcebd7; }
+    .notice { display:flex; align-items:flex-start; gap:11px; color:#5c765f; background:#e9f1e4; border:1px solid #d5e5ce; margin-top:24px; padding:14px 17px; border-radius:13px; font-size:13px; line-height:1.7; }
+    .notice svg { height:18px; width:18px; flex:0 0 auto; margin-top:2px; }
+    .info-section { padding:90px 0 100px; }
+    .info-top { display:flex; justify-content:space-between; gap:25px; align-items:end; margin-bottom:26px; }
+    .section-overline { text-transform:uppercase; letter-spacing:1.8px; color:#547f5c; font-size:11px; font-weight:850; }
+    h2 { font-size:clamp(27px,3vw,39px); line-height:1.2; letter-spacing:-1.45px; margin:13px 0 0; }
+    .info-sub { color:#6b7f71; max-width:350px; font-size:14px; line-height:1.75; margin:0; }
+    .letters { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+    .letter-card { border:1px solid #e0e8dd; background:#fff; border-radius:17px; padding:24px 23px; min-width:0; }
+    .letter-card:hover { box-shadow:0 12px 24px #15352d0b; }
+    .letter-from { font-size:12px; font-weight:650; color:#8a9d8c; }
+    .letter-main { margin:12px 0 10px; display:flex; gap:14px; align-items:center; }
+    .old-letter { font-size:31px; font-weight:650; color:#819586; letter-spacing:-1px; }
+    .arrow { color:#95b291; font-size:20px; }
+    .new-letter { font-size:47px; font-weight:790; color:#236346; letter-spacing:-1px; }
+    .letter-example { color:#677a6c; font-size:12px; }
+    .letter-example b { color:#2d5743; }
+    .bottom-strip { display:flex; justify-content:space-between; gap:20px; align-items:center; padding:22px 26px; margin-top:18px; border-radius:15px; background:#e7eee3; }
+    .bottom-strip .title { font-size:14px; font-weight:780; margin-bottom:4px; }
+    .bottom-strip .body { font-size:12px; color:#657a6b; line-height:1.65; }
+    .date-pill { color:#386345; font-size:12px; font-weight:800; border:1px solid #c4d7be; padding:10px 15px; border-radius:100px; white-space:nowrap; }
+    footer { border-top:1px solid #dce6da; padding:27px 0 35px; display:flex; justify-content:space-between; align-items:center; gap:20px; color:#728578; font-size:12px; }
+    footer a { color:#426b4f; text-underline-offset:3px; }
+    .toast { position:fixed; bottom:25px; left:50%; transform:translate(-50%,18px); opacity:0; pointer-events:none; background:#174837; color:#fff; padding:13px 19px; border-radius:12px; box-shadow:0 12px 35px #112f2f32; z-index:10; font-weight:670; font-size:13px; transition:opacity .16s, transform .16s; max-width:calc(100% - 30px); text-align:center; }
+    .toast.show { opacity:1; transform:translate(-50%,0); }
+    .sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+    @media(max-width:880px) {
+      .hero { grid-template-columns:1fr 210px; padding:63px 0 46px; }
+      .hero-art { height:200px; }
+      .art-circle { width:195px; height:195px; }
+      .art-letter { font-size:130px; }
+      .float-a { right:-5px; }
+      h1 { letter-spacing:-2.5px; }
+      .letter-card { padding:19px 15px; }
+      .letter-main { gap:8px; }
+      .new-letter { font-size:39px; }
+    }
+    @media(max-width:660px) {
+      .container { width:min(100% - 28px, 550px); }
+      .header { height:70px; }
+      .brand { font-size:21px; }
+      .brand-mark { height:35px; width:35px; font-size:22px; }
+      .nav { gap:12px; }
+      .nav a:not(.nav-pill) { display:none; }
+      .nav-pill { font-size:11px!important; padding:9px 12px; }
+      .hero { display:block; padding:47px 0 30px; }
+      .hero-art { display:none; }
+      h1 { font-size:43px; line-height:1.1; letter-spacing:-2.5px; margin:18px 0 15px; }
+      .lead { font-size:14px; line-height:1.7; }
+      .converter { padding:15px; border-radius:19px; }
+      .converter-top { margin-bottom:13px; }
+      .tab { font-size:12px; padding:11px 13px; }
+      .tab-row { margin-bottom:13px; }
+      .editor-grid { grid-template-columns:1fr; gap:12px; }
+      textarea { min-height:155px; padding:14px 16px; font-size:15px; }
+      .editor-head { min-height:48px; padding:10px 12px; }
+      .editor-foot { padding:9px 13px; min-height:38px; }
+      .converter-actions { align-items:stretch; gap:15px; }
+      .privacy { order:2; width:100%; justify-content:center; }
+      .right-actions { order:1; width:100%; }
+      .action { flex:1; }
+      .examples { margin-top:17px; }
+      .info-section { padding:66px 0; }
+      .info-top { display:block; }
+      .info-sub { margin-top:13px; }
+      .letters { grid-template-columns:repeat(2,1fr); gap:11px; }
+      .letter-card { padding:20px 16px; }
+      .bottom-strip { align-items:flex-start; flex-direction:column; gap:13px; padding:20px; }
+      footer { flex-direction:column; align-items:flex-start; gap:9px; padding:24px 0; }
+    }
+    @media (prefers-reduced-motion:reduce) { *, *::before, *::after { scroll-behavior:auto!important; transition:none!important; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <a class="brand" href="#top" aria-label="Alifbo bosh sahifa"><span class="brand-mark">ö</span> alifbo<span style="color:#86aa80">.</span></a>
+      <nav class="nav" aria-label="Sayt bo‘limlari">
+        <a href="#konverter">Konverter</a>
+        <a href="#ozgarishlar">Yangi harflar</a>
+        <a href="#konverter" class="nav-pill">Matnni o‘girish ↗</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="headline">
+        <div class="hero-content">
+          <div class="eyebrow"><span class="tiny-dot" aria-hidden="true"></span> O‘ZBEK YOZUVI · 2026-YILGI ISLOHOT</div>
+          <h1 id="headline">Yangi alifbo.<br /><span class="accent">Yangi imkoniyatlar.</span></h1>
+          <p class="lead">Eski lotin yoki kirill yozuvidagi matningizni yangi o‘zbek lotin alifbosiga bir zumda o‘tkazing. Hech qanday ro‘yxatdan o‘tish shart emas.</p>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="art-circle"><span class="art-letter">Ö</span></div>
+          <span class="float-letter float-a">Ş</span><span class="float-letter float-b">Ç</span><span class="float-letter float-c">Ğ</span>
+        </div>
+      </section>
+
+      <section id="konverter" class="converter-wrap" aria-label="Matn konverteri">
+        <div class="converter">
+          <div class="converter-top">
+            <h2 class="section-heading" style="margin:0;font-size:19px;letter-spacing:-.45px">Matn konverteri</h2>
+            <span class="live-tag"><i></i> Real vaqtda o‘girish</span>
+          </div>
+          <div class="tab-row" role="tablist" aria-label="O‘girish yo‘nalishi">
+            <button class="tab" id="tab-latin" role="tab" type="button" aria-selected="true" data-mode="latin" >Eski lotin → Yangi</button>
+            <button class="tab" id="tab-cyrillic" role="tab" type="button" aria-selected="false" data-mode="cyrillic">Kirill → Yangi</button>
+            <button class="tab" id="tab-reverse" role="tab" type="button" aria-selected="false" data-mode="reverse">Yangi → Eski lotin</button>
+          </div>
+          <div class="editor-grid">
+            <div class="editor">
+              <div class="editor-head">
+                <span class="editor-label" id="input-label">Eski lotin yozuvi</span>
+                <div class="toolbar">
+                  <button type="button" class="tool-btn" id="paste-btn" title="Buferdan joylash">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="14" height="17" rx="2"/><path d="M9 5V3h6v2M9 10h6M9 14h6"/></svg> Joylash
+                  </button>
+                  <button type="button" class="tool-btn" id="clear-btn" title="Matnni tozalash">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg> Tozalash
+                  </button>
+                </div>
+              </div>
+              <label for="source" class="sr-only">O‘giriladigan matn</label>
+              <textarea id="source" placeholder="Matnni shu yerga yozing yoki joylang..." spellcheck="false" autocomplete="off"></textarea>
+              <div class="editor-foot"><span id="source-count">0 ta belgi · 0 ta so‘z</span><span>UTF-8</span></div>
+            </div>
+            <div class="editor result">
+              <div class="editor-head">
+                <span class="editor-label"><span class="round-dot" aria-hidden="true"></span><span id="result-label">Yangi lotin yozuvi</span></span>
+                <div class="toolbar">
+                  <button type="button" class="tool-btn" id="inline-copy-btn" title="Natijani nusxalash">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg> Nusxalash
+                  </button>
+                </div>
+              </div>
+              <label for="result" class="sr-only">O‘girilgan matn</label>
+              <textarea id="result" placeholder="Natija shu yerda paydo bo‘ladi..." readonly spellcheck="false"></textarea>
+              <div class="editor-foot"><span id="result-count">0 ta belgi · 0 ta so‘z</span><strong id="status" aria-live="polite">Tayyor</strong></div>
+            </div>
+          </div>
+          <div class="converter-actions">
+            <span class="privacy">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+              Maxfiy: matningiz qurilmangizdan tashqariga yuborilmaydi
+            </span>
+            <div class="right-actions">
+              <button type="button" class="action secondary" id="download-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 5-5m-5 5-5-5M4 17v3h16v-3"/></svg> .txt yuklash
+              </button>
+              <button type="button" class="action primary" id="copy-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg> Natijani nusxalash
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="examples">
+          <span class="examples-label">Namuna uchun:</span>
+          <button type="button" class="example" data-example="1">Oddiy gap ↗</button>
+          <button type="button" class="example" data-example="2">Bosh harflar ↗</button>
+          <button type="button" class="example" data-example="3">Uzun matn ↗</button>
+        </div>
+        <div class="notice">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 10v6m0-9v.5"/></svg>
+          <div><strong>Muhim:</strong> Konverter harflarni qoidaga asosan almashtiradi. Ayrim chet tilidagi ismlar, qo‘shma so‘zlar va kirill yozuvidagi noaniq holatlarni qo‘lda tekshirish tavsiya etiladi. <b>ng</b> birikmasi o‘zgarmaydi.</div>
+        </div>
+      </section>
+
+      <section id="ozgarishlar" class="info-section" aria-labelledby="change-title">
+        <div class="info-top">
+          <div><div class="section-overline">NIMALAR O‘ZGARDI?</div><h2 id="change-title">To‘rtta harf, qulayroq yozuv.</h2></div>
+          <p class="info-sub">2026-yil 21-oktabrda qabul qilingan qonunga ko‘ra, yangi alifboda quyidagi to‘rtta harf shakli o‘zgaradi.</p>
+        </div>
+        <div class="letters">
+          <article class="letter-card"><span class="letter-from">O‘ / o‘ o‘rniga</span><div class="letter-main"><span class="old-letter">O‘</span><span class="arrow">→</span><span class="new-letter">Ö</span></div><div class="letter-example">o‘zbekiston → <b>özbekiston</b></div></article>
+          <article class="letter-card"><span class="letter-from">G‘ / g‘ o‘rniga</span><div class="letter-main"><span class="old-letter">G‘</span><span class="arrow">→</span><span class="new-letter">Ğ</span></div><div class="letter-example">tog‘ → <b>toğ</b></div></article>
+          <article class="letter-card"><span class="letter-from">Sh / sh o‘rniga</span><div class="letter-main"><span class="old-letter">Sh</span><span class="arrow">→</span><span class="new-letter">Ş</span></div><div class="letter-example">shahar → <b>şahar</b></div></article>
+          <article class="letter-card"><span class="letter-from">Ch / ch o‘rniga</span><div class="letter-main"><span class="old-letter">Ch</span><span class="arrow">→</span><span class="new-letter">Ç</span></div><div class="letter-example">chiroq → <b>çiroq</b></div></article>
+        </div>
+        <div class="bottom-strip">
+          <div><div class="title">Yangi yozuv qachondan amal qiladi?</div><div class="body">O‘RQ–1184-son qonunga ko‘ra, yangi alifbo 2027-yil 22-apreldan kuchga kiradi. Eski hujjatlar o‘z kuchini saqlab qoladi.</div></div>
+          <span class="date-pill">22-aprel, 2027</span>
+        </div>
+      </section>
+    </main>
+    <footer>
+      <span>© 2026 Alifbo. Bepul, ochiq va foydalanishga tayyor.</span>
+      <span>Manbalar: <a href="https://www.lex.uz/en/docs/8549969" rel="noopener noreferrer" target="_blank">Qonun (O‘RQ–1184)</a> · <a href="https://gov.uz/oz/yoshlar/news/view/238380" target="_blank" rel="noopener noreferrer">Rasmiy xabar</a></span>
+    </footer>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    'use strict';
+    // These functions deliberately have no server dependencies.
+    const APOS = "['’‘ʻʼ`´]";
+    function oldToNew(text) {
+      return text
+        .replace(new RegExp('([OoGg])' + APOS, 'g'), (_, letter) => {
+          return letter === 'O' ? 'Ö' : letter === 'o' ? 'ö' : letter === 'G' ? 'Ğ' : 'ğ';
+        })
+        .replace(/sh|ch/gi, match => {
+          const upper = match[0] === match[0].toUpperCase();
+          return match.toLowerCase() === 'sh' ? (upper ? 'Ş' : 'ş') : (upper ? 'Ç' : 'ç');
+        });
+    }
+    function isUpperLetter(ch) { return !!ch && ch.toLocaleUpperCase('uz') === ch && ch.toLocaleLowerCase('uz') !== ch; }
+    function isLowerLetter(ch) { return !!ch && ch.toLocaleLowerCase('uz') === ch && ch.toLocaleUpperCase('uz') !== ch; }
+    function uppercaseInWord(text, index) {
+      const prev = [...text.slice(0, index)].pop() || '';
+      const next = [...text.slice(index + 1)][0] || '';
+      return isUpperLetter(prev) || (isUpperLetter(next) && !isLowerLetter(next));
+    }
+    function newToOld(text) {
+      return text.replace(/[ÖöĞğŞşÇç]/g, (ch, index, full) => {
+        const upperWord = uppercaseInWord(full, index);
+        switch (ch) {
+          case 'Ö': return 'Oʻ'; case 'ö': return 'oʻ';
+          case 'Ğ': return 'Gʻ'; case 'ğ': return 'gʻ';
+          case 'Ş': return upperWord ? 'SH' : 'Sh'; case 'ş': return 'sh';
+          case 'Ç': return upperWord ? 'CH' : 'Ch'; case 'ç': return 'ch';
+          default: return ch;
+        }
+      });
+    }
+    const CYR = {
+      'а':'a','б':'b','в':'v','г':'g','д':'d','ж':'j','з':'z','и':'i','й':'y','к':'k',
+      'л':'l','м':'m','н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f',
+      'х':'x','ц':'ts','ч':'ç','ш':'ş','щ':'şç','ы':'i','э':'e','ю':'yu','я':'ya',
+      'ё':'yo','ў':'ö','ғ':'ğ','қ':'q','ҳ':'h','ъ':'ʼ','ь':''
+    };
+    const CYR_LETTER = /[а-яёўғқҳ]/i;
+    const CYR_VOWEL = /[аоуиэеёюяыў]/i;
+    function cyrillicToNew(text) {
+      const chars = [...text];
+      return chars.map((ch, i) => {
+        const lower = ch.toLowerCase();
+        const prev = i ? chars[i - 1] : '';
+        const next = chars[i + 1] || '';
+        let result;
+        if (lower === 'е') {
+          result = !CYR_LETTER.test(prev) || CYR_VOWEL.test(prev) || /[ъь]/i.test(prev) ? 'ye' : 'e';
+        } else {
+          result = CYR[lower];
+        }
+        if (result === undefined) return ch;
+        if (ch !== lower && result) {
+          const isCapsWord = isUpperLetter(next) || isUpperLetter(prev);
+          return isCapsWord ? result.toUpperCase() : result[0].toUpperCase() + result.slice(1);
+        }
+        return result;
+      }).join('');
+    }
+    function convert(text, mode) {
+      if (mode === 'reverse') return newToOld(text);
+      if (mode === 'cyrillic') return cyrillicToNew(text);
+      return oldToNew(text);
+    }
+
+    const source = document.querySelector('#source');
+    const result = document.querySelector('#result');
+    const tabs = [...document.querySelectorAll('[data-mode]')];
+    const countSource = document.querySelector('#source-count');
+    const countResult = document.querySelector('#result-count');
+    const status = document.querySelector('#status');
+    let mode = 'latin';
+    let toastTimer;
+    const samples = {
+      latin: [
+        'O‘zbekiston — bizning Vatanimiz. Yangi alifboda o‘qish va yozish qulay bo‘ladi.',
+        'SHARQ, CHIROQ, G‘ALABA, O‘ZBEKISTON. Shahar, Chortoq, G‘uzor.',
+        'Shahar chetidagi bog‘da o‘quvchilar yangi o‘zbek alifbosini o‘rganishdi. O‘qituvchi ularga sh, ch, o‘ va g‘ harflari qanday o‘zgarishini tushuntirdi.'
+      ],
+      cyrillic: [
+        'Ўзбекистон — бизнинг Ватанимиз. Янги алифбода ўқиш ва ёзиш қулай бўлади.',
+        'ШАРҚ, ЧИРОҚ, ҒАЛАБА, ЎЗБЕКИСТОН. Шаҳар, Чортоқ, Ғузор.',
+        'Шаҳар четидаги боғда ўқувчилар янги ўзбек алифбосини ўрганишди. Ўқитувчи уларга ҳарфлар қандай ўзгаришини тушунтирди.'
+      ],
+      reverse: [
+        'Özbekiston — bizning Vatanimiz. Yangi alifboda öqiş va yoziş qulay böladi.',
+        'ŞARQ, ÇIROQ, ĞALABA, ÖZBEKISTON. Şahar, Çortoq, Ğuzor.',
+        'Şahar çetidagi bağda öquvçilar yangi özbek alifbosini örganişdi. Öqituvçi ularga ş, ç, ö va ğ harflari qanday özgarişini tuşuntirdi.'
+      ]
+    };
+    function stats(text) {
+      const chars = [...text].length;
+      const words = text.trim() ? text.trim().split(/\s+/u).length : 0;
+      return `${chars.toLocaleString('uz-UZ')} ta belgi · ${words.toLocaleString('uz-UZ')} ta so‘z`;
+    }
+    function render() {
+      result.value = convert(source.value, mode);
+      countSource.textContent = stats(source.value);
+      countResult.textContent = stats(result.value);
+      status.textContent = source.value.trim() ? 'O‘girildi ✓' : 'Tayyor';
+      status.classList.toggle('success', !!source.value.trim());
+    }
+    function showToast(message) {
+      const toast = document.querySelector('#toast');
+      clearTimeout(toastTimer);
+      toast.textContent = message;
+      toast.classList.add('show');
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+    }
+    tabs.forEach(tab => tab.addEventListener('click', () => {
+      mode = tab.dataset.mode;
+      tabs.forEach(t => t.setAttribute('aria-selected', String(t === tab)));
+      document.querySelector('#input-label').textContent = mode === 'latin' ? 'Eski lotin yozuvi' : mode === 'cyrillic' ? 'Kirill yozuvi' : 'Yangi lotin yozuvi';
+      document.querySelector('#result-label').textContent = mode === 'reverse' ? 'Eski lotin yozuvi' : 'Yangi lotin yozuvi';
+      source.placeholder = mode === 'cyrillic' ? 'Матнни шу ерга ёзинг ёки жойланг...' : 'Matnni shu yerga yozing yoki joylang...';
+      render();
+    }));
+    source.addEventListener('input', render);
+    document.querySelector('#clear-btn').addEventListener('click', () => { source.value = ''; render(); source.focus(); });
+    document.querySelector('#paste-btn').addEventListener('click', async () => {
+      try {
+        if (!navigator.clipboard?.readText) throw Error('Clipboard not available');
+        const text = await navigator.clipboard.readText();
+        source.value = text;
+        render();
+        source.focus();
+        showToast('Matn joylandi');
+      } catch { source.focus(); showToast('Buferga ruxsat berilmadi. Ctrl+V tugmalaridan foydalaning.'); }
+    });
+    async function copyResult() {
+      if (!result.value) { showToast('Avval matn kiriting'); return; }
+      try {
+        if (navigator.clipboard?.writeText) { await navigator.clipboard.writeText(result.value); }
+        else throw Error('clipboard unavailable');
+      } catch {
+        result.focus(); result.select();
+        try {
+          if (!document.execCommand('copy')) throw Error('copy failed');
+        } catch { showToast('Natijani belgilab, Ctrl+C bilan nusxalang'); return; }
+      }
+      showToast('Natija nusxalandi ✓');
+    }
+    document.querySelector('#copy-btn').addEventListener('click', copyResult);
+    document.querySelector('#inline-copy-btn').addEventListener('click', copyResult);
+    document.querySelector('#download-btn').addEventListener('click', () => {
+      if (!result.value) { showToast('Avval matn kiriting'); return; }
+      const file = new Blob(['\uFEFF', result.value], {type:'text/plain;charset=utf-8'});
+      const url = URL.createObjectURL(file);
+      const link = document.createElement('a');
+      link.href = url; link.download = 'yangi-alifbo.txt';
+      document.body.appendChild(link); link.click(); link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      showToast('Matn fayli tayyor');
+    });
+    document.querySelectorAll('[data-example]').forEach(btn => btn.addEventListener('click', () => {
+      source.value = samples[mode][Number(btn.dataset.example)-1];
+      render(); source.focus();
+    }));
+    render();
+  </script>
+</body>
+</html>
