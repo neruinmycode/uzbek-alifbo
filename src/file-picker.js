@@ -72,7 +72,9 @@ export function setupFilePicker(getMode) {
         download.href = url;
         download.download = name;
         download.hidden = false;
-        showStatus([`${name} tayyor.`, pages, data.missingGlyphs
+        const artwork = data.missingArtwork?.length
+          ? `Ayrim rasmlar yoki chizmalar saqlanmadi (${data.missingArtwork.join(', ')}-sahifalar).` : '';
+        showStatus([`${name} tayyor.`, pages, artwork, data.missingGlyphs
           ? 'Tanlangan shriftda yo‘q belgilar � bilan almashtirildi.' : ''].filter(Boolean).join('\n'));
       });
       worker.postMessage({ file, format, mode });

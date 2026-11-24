@@ -75,6 +75,7 @@ test('the static app converts pasted text and local documents and downloads them
 
   await page.getByRole('tab', { name: 'Eski lotin → Yangi' }).click();
   await download('matn.pdf', 'matn-alifbo.pdf', 'matn-forward.pdf');
+  await download('jadval.pdf', 'jadval-alifbo.pdf');
 
   await pick(join(fixtures, 'scan.pdf'));
   await expect(page.locator('#file-status')).toContainText('O‘girish uchun tanlanadigan matn kerak.');

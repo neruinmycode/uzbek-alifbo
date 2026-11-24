@@ -7,7 +7,7 @@ Choose a direction and then select **Faylni tanlash**. When conversion finishes,
 - **DOCX** covers paragraphs, tables, headers, and footers.
 - **XLSX** covers literal shared and inline strings, including rich text. Numeric and date cells, formulas and their cached results, and sheet names are preserved.
 - **PPTX** covers titles, text boxes, and table cells on slides.
-- **PDF** conversion flows selectable text into a new searchable PDF with embedded Noto Sans. The app lists the original page numbers with no extractable text and skips those pages. If no page has selectable text, the app explains the requirement in Uzbek.
+- **PDF** conversion rebuilds each text page at its original size and positions searchable text in its original columns and table cells. It embeds Noto Sans and preserves page artwork as a raster background where possible. The app lists and skips pages without extractable text. If no page has selectable text, the app explains the requirement in Uzbek.
 
 Office conversions edit the original Office Open XML package. When a spelling spans differently formatted runs, the replacement takes the formatting of the first source character. For example, **S**hahar becomes **Ş**ahar. Media and relationship parts are copied from the source archive.
 
@@ -35,7 +35,7 @@ The native test suite covers all directions, capitalization, apostrophe variants
 npm test
 ```
 
-The browser suite uses Chromium, Python 3.12+, and the Poppler tools `pdftotext`, `pdffonts`, and `pdfinfo` on the path. It generates its own fixtures, tests the picker and downloads, checks the network requests, and reopens each output with an independent reader.
+The browser suite uses Chromium, Python 3.12+, and the Poppler tools `pdftotext`, `pdftoppm`, `pdffonts`, and `pdfinfo` on the path. It generates its own fixtures, tests the picker and downloads, checks the network requests, and reopens each output with an independent reader.
 
 ```sh
 python3 -m venv /tmp/alifbo-test-env
@@ -76,5 +76,5 @@ npx wrangler pages deploy dist --project-name uzbek-alifbo --branch main
 
 - OCR, legacy `.doc`/`.xls`/`.ppt`, and password-protected files are outside the first release. Individual Office XML parts that the app reads are limited to 32 MiB. Large files also depend on available browser memory.
 - Converted Office text can reflow when a spelling changes width. Comments, notes, chart labels, and other Office parts outside the supported sections are left as supplied. Editing a digitally signed document can invalidate its signature.
-- PDF output flows the extracted text into new A4 pages. Reading order depends on the source text layer, especially for columns. Characters outside the bundled font’s coverage are replaced with `�` and reported in the interface.
+- Rebuilt PDFs use substitute typography. Search and copy order depend on the source text layer. Links, forms, and accessibility tags are outside the PDF conversion scope. The app reports artwork it could not preserve and replaces characters outside the bundled font’s coverage with `�`.
 - The app requires a recent browser with WebAssembly and module Web Workers.

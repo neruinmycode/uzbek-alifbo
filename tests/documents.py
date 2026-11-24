@@ -131,6 +131,29 @@ def generate(directory):
     pdf.drawImage(image.as_posix(), 60, 700, 54, 54)
     pdf.save()
 
+    # The PDF reading order deliberately differs from the table's visual order.
+    pdf = Canvas((directory / "jadval.pdf").as_posix(), pagesize=(460, 320))
+    pdf.setStrokeColorRGB(0.1, 0.4, 0.25)
+    pdf.rect(25, 105, 400, 170)
+    pdf.line(235, 105, 235, 275)
+    for y in [220, 160]:
+        pdf.line(25, y, 425, y)
+    pdf.drawImage(image.as_posix(), 25, 30, 25, 25)
+    pdf.setFont("Helvetica-Bold", 15)
+    pdf.drawString(45, 248, "Shahar")
+    pdf.drawString(260, 248, "Chiroq")
+    pdf.setFont("NotoSans", 12)
+    pdf.drawString(45, 198, "O‘zbekiston")
+    pdf.drawString(45, 138, "G‘uzor")
+    pdf.drawString(260, 198, "01")
+    pdf.drawString(260, 138, "02")
+    pdf.saveState()
+    pdf.translate(420, 35)
+    pdf.rotate(90)
+    pdf.drawString(0, 0, "Chor")
+    pdf.restoreState()
+    pdf.save()
+
 
 def check_package(source, target, allowed_changes):
     with ZipFile(source) as original, ZipFile(target) as result:
@@ -205,6 +228,24 @@ def verify(directory, output, layout=None):
         # A forward conversion verifies all four new letters in the embedded font.
         text = subprocess.check_output(["pdftotext", layout, "-"], text=True)
         assert "ÖZBEKISTON, Ğuzor, Şahar, ÇIROQ." in text
+
+    table_pdf = output / "jadval-alifbo.pdf"
+    text = subprocess.check_output(["pdftotext", "-layout", table_pdf, "-"], text=True)
+    assert re.search(r"Şahar {2,}Çiroq", text), text
+    assert re.search(r"Özbekiston {2,}01", text), text
+    assert re.search(r"Ğuzor {2,}02", text), text
+    assert "Çor" in text and "Chiroq" not in text
+    bounds = ET.fromstring(subprocess.check_output(["pdftotext", "-bbox", table_pdf, "-"]))
+    columns = {word.text: float(word.get("xMin")) for word in bounds.findall(".//{*}word")}
+    assert columns["Şahar"] == columns["Özbekiston"] == columns["Ğuzor"] == 45
+    assert columns["Çiroq"] == columns["01"] == columns["02"] == 260
+    info = subprocess.check_output(["pdfinfo", table_pdf], text=True)
+    assert re.search(r"^Page size:\s+460 x 320 pts", info, re.M), info
+    rendered = subprocess.check_output(["pdftoppm", "-r", "72", "-singlefile", "-png", table_pdf])
+    with Image.open(io.BytesIO(rendered)) as page:
+        for point in [(235, 80), (35, 275)]:
+            red, green, blue = page.convert("RGB").getpixel(point)
+            assert green > red and green > blue, (point, red, green, blue)
 
 
 if __name__ == "__main__":
