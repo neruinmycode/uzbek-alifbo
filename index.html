@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
   <meta name="theme-color" content="#eff3ed" />
   <meta name="description" content="Eski lotin yoki kirill yozuvidagi o‘zbekcha matnni 2026-yilda qabul qilingan yangi lotin alifbosiga o‘tkazing. Bepul va xavfsiz konverter." />
   <title>Alifbo — Yangi o‘zbek alifbosi konverteri</title>
@@ -89,6 +90,17 @@
     .action.secondary:hover { background:#f1f8ec; }
     .action.primary { background:var(--green); color:white; border-color:var(--green); }
     .action.primary:hover { background:#256448; }
+    .file-converter { border-top:1px solid #e2e9df; margin-top:22px; padding-top:20px; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px 20px; align-items:center; }
+    .file-converter h2 { margin:0 0 7px; }
+    .file-converter p { margin:0; color:var(--ink-muted); font-size:13px; line-height:1.6; }
+    .file-actions { display:flex; flex-wrap:wrap; gap:9px; }
+    .file-actions label { cursor:pointer; }
+    .file-actions input:focus-visible + label { outline:3px solid #80bb58; outline-offset:3px; }
+    .file-actions input:disabled + label { opacity:.6; cursor:wait; transform:none; }
+    .file-actions a { text-decoration:none; }
+    .file-actions [hidden], .file-status:empty { display:none; }
+    .file-converter .file-status { grid-column:1/-1; overflow-wrap:anywhere; font-weight:650; white-space:pre-line; }
+    .file-converter .file-status[data-error] { color:#9b2c23; }
     .examples { display:flex; align-items:center; gap:12px; margin:19px 2px 0; flex-wrap:wrap; }
     .examples-label { color:#6b7c6d; font-size:12px; font-weight:730; }
     .example { padding:9px 13px; border:1px solid #d4e1d2; border-radius:999px; background:#eaf1e8; color:#3a5948; font-size:12px; font-weight:650; }
@@ -154,6 +166,7 @@
       .privacy { order:2; width:100%; justify-content:center; }
       .right-actions { order:1; width:100%; }
       .action { flex:1; }
+      .file-converter { grid-template-columns:1fr; }
       .examples { margin-top:17px; }
       .info-section { padding:66px 0; }
       .info-top { display:block; }
@@ -235,7 +248,7 @@
           <div class="converter-actions">
             <span class="privacy">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
-              Maxfiy: matningiz qurilmangizdan tashqariga yuborilmaydi
+              Maxfiy: matn va fayllar qurilmangizda qoladi
             </span>
             <div class="right-actions">
               <button type="button" class="action secondary" id="download-btn">
@@ -246,6 +259,19 @@
               </button>
             </div>
           </div>
+          <section class="file-converter" aria-labelledby="file-heading">
+            <div>
+              <h2 class="section-heading" id="file-heading">Faylni o‘girish</h2>
+              <p id="file-help">DOCX, XLSX, PPTX yoki PDF. Yuqoridagi yo‘nalish qo‘llanadi.</p>
+              <p>PDF tanlanadigan matndan yangi sahifa tartibida yaratiladi.</p>
+            </div>
+            <div class="file-actions">
+              <input type="file" id="file-input" class="sr-only" accept=".docx,.xlsx,.pptx,.pdf" aria-label="Faylni tanlash" aria-describedby="file-help" />
+              <label for="file-input" class="action secondary">Faylni tanlash</label>
+              <a id="file-download" class="action primary" hidden>Faylni yuklash</a>
+            </div>
+            <p id="file-status" class="file-status" role="status"></p>
+          </section>
         </div>
         <div class="examples">
           <span class="examples-label">Namuna uchun:</span>
@@ -283,167 +309,6 @@
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script>
-    'use strict';
-    // These functions deliberately have no server dependencies.
-    const APOS = "['’‘ʻʼ`´]";
-    function oldToNew(text) {
-      return text
-        .replace(new RegExp('([OoGg])' + APOS, 'g'), (_, letter) => {
-          return letter === 'O' ? 'Ö' : letter === 'o' ? 'ö' : letter === 'G' ? 'Ğ' : 'ğ';
-        })
-        .replace(/sh|ch/gi, match => {
-          const upper = match[0] === match[0].toUpperCase();
-          return match.toLowerCase() === 'sh' ? (upper ? 'Ş' : 'ş') : (upper ? 'Ç' : 'ç');
-        });
-    }
-    function isUpperLetter(ch) { return !!ch && ch.toLocaleUpperCase('uz') === ch && ch.toLocaleLowerCase('uz') !== ch; }
-    function isLowerLetter(ch) { return !!ch && ch.toLocaleLowerCase('uz') === ch && ch.toLocaleUpperCase('uz') !== ch; }
-    function uppercaseInWord(text, index) {
-      const prev = [...text.slice(0, index)].pop() || '';
-      const next = [...text.slice(index + 1)][0] || '';
-      return isUpperLetter(prev) || (isUpperLetter(next) && !isLowerLetter(next));
-    }
-    function newToOld(text) {
-      return text.replace(/[ÖöĞğŞşÇç]/g, (ch, index, full) => {
-        const upperWord = uppercaseInWord(full, index);
-        switch (ch) {
-          case 'Ö': return 'Oʻ'; case 'ö': return 'oʻ';
-          case 'Ğ': return 'Gʻ'; case 'ğ': return 'gʻ';
-          case 'Ş': return upperWord ? 'SH' : 'Sh'; case 'ş': return 'sh';
-          case 'Ç': return upperWord ? 'CH' : 'Ch'; case 'ç': return 'ch';
-          default: return ch;
-        }
-      });
-    }
-    const CYR = {
-      'а':'a','б':'b','в':'v','г':'g','д':'d','ж':'j','з':'z','и':'i','й':'y','к':'k',
-      'л':'l','м':'m','н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f',
-      'х':'x','ц':'ts','ч':'ç','ш':'ş','щ':'şç','ы':'i','э':'e','ю':'yu','я':'ya',
-      'ё':'yo','ў':'ö','ғ':'ğ','қ':'q','ҳ':'h','ъ':'ʼ','ь':''
-    };
-    const CYR_LETTER = /[а-яёўғқҳ]/i;
-    const CYR_VOWEL = /[аоуиэеёюяыў]/i;
-    function cyrillicToNew(text) {
-      const chars = [...text];
-      return chars.map((ch, i) => {
-        const lower = ch.toLowerCase();
-        const prev = i ? chars[i - 1] : '';
-        const next = chars[i + 1] || '';
-        let result;
-        if (lower === 'е') {
-          result = !CYR_LETTER.test(prev) || CYR_VOWEL.test(prev) || /[ъь]/i.test(prev) ? 'ye' : 'e';
-        } else {
-          result = CYR[lower];
-        }
-        if (result === undefined) return ch;
-        if (ch !== lower && result) {
-          const isCapsWord = isUpperLetter(next) || isUpperLetter(prev);
-          return isCapsWord ? result.toUpperCase() : result[0].toUpperCase() + result.slice(1);
-        }
-        return result;
-      }).join('');
-    }
-    function convert(text, mode) {
-      if (mode === 'reverse') return newToOld(text);
-      if (mode === 'cyrillic') return cyrillicToNew(text);
-      return oldToNew(text);
-    }
-
-    const source = document.querySelector('#source');
-    const result = document.querySelector('#result');
-    const tabs = [...document.querySelectorAll('[data-mode]')];
-    const countSource = document.querySelector('#source-count');
-    const countResult = document.querySelector('#result-count');
-    const status = document.querySelector('#status');
-    let mode = 'latin';
-    let toastTimer;
-    const samples = {
-      latin: [
-        'O‘zbekiston — bizning Vatanimiz. Yangi alifboda o‘qish va yozish qulay bo‘ladi.',
-        'SHARQ, CHIROQ, G‘ALABA, O‘ZBEKISTON. Shahar, Chortoq, G‘uzor.',
-        'Shahar chetidagi bog‘da o‘quvchilar yangi o‘zbek alifbosini o‘rganishdi. O‘qituvchi ularga sh, ch, o‘ va g‘ harflari qanday o‘zgarishini tushuntirdi.'
-      ],
-      cyrillic: [
-        'Ўзбекистон — бизнинг Ватанимиз. Янги алифбода ўқиш ва ёзиш қулай бўлади.',
-        'ШАРҚ, ЧИРОҚ, ҒАЛАБА, ЎЗБЕКИСТОН. Шаҳар, Чортоқ, Ғузор.',
-        'Шаҳар четидаги боғда ўқувчилар янги ўзбек алифбосини ўрганишди. Ўқитувчи уларга ҳарфлар қандай ўзгаришини тушунтирди.'
-      ],
-      reverse: [
-        'Özbekiston — bizning Vatanimiz. Yangi alifboda öqiş va yoziş qulay böladi.',
-        'ŞARQ, ÇIROQ, ĞALABA, ÖZBEKISTON. Şahar, Çortoq, Ğuzor.',
-        'Şahar çetidagi bağda öquvçilar yangi özbek alifbosini örganişdi. Öqituvçi ularga ş, ç, ö va ğ harflari qanday özgarişini tuşuntirdi.'
-      ]
-    };
-    function stats(text) {
-      const chars = [...text].length;
-      const words = text.trim() ? text.trim().split(/\s+/u).length : 0;
-      return `${chars.toLocaleString('uz-UZ')} ta belgi · ${words.toLocaleString('uz-UZ')} ta so‘z`;
-    }
-    function render() {
-      result.value = convert(source.value, mode);
-      countSource.textContent = stats(source.value);
-      countResult.textContent = stats(result.value);
-      status.textContent = source.value.trim() ? 'O‘girildi ✓' : 'Tayyor';
-      status.classList.toggle('success', !!source.value.trim());
-    }
-    function showToast(message) {
-      const toast = document.querySelector('#toast');
-      clearTimeout(toastTimer);
-      toast.textContent = message;
-      toast.classList.add('show');
-      toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
-    }
-    tabs.forEach(tab => tab.addEventListener('click', () => {
-      mode = tab.dataset.mode;
-      tabs.forEach(t => t.setAttribute('aria-selected', String(t === tab)));
-      document.querySelector('#input-label').textContent = mode === 'latin' ? 'Eski lotin yozuvi' : mode === 'cyrillic' ? 'Kirill yozuvi' : 'Yangi lotin yozuvi';
-      document.querySelector('#result-label').textContent = mode === 'reverse' ? 'Eski lotin yozuvi' : 'Yangi lotin yozuvi';
-      source.placeholder = mode === 'cyrillic' ? 'Матнни шу ерга ёзинг ёки жойланг...' : 'Matnni shu yerga yozing yoki joylang...';
-      render();
-    }));
-    source.addEventListener('input', render);
-    document.querySelector('#clear-btn').addEventListener('click', () => { source.value = ''; render(); source.focus(); });
-    document.querySelector('#paste-btn').addEventListener('click', async () => {
-      try {
-        if (!navigator.clipboard?.readText) throw Error('Clipboard not available');
-        const text = await navigator.clipboard.readText();
-        source.value = text;
-        render();
-        source.focus();
-        showToast('Matn joylandi');
-      } catch { source.focus(); showToast('Buferga ruxsat berilmadi. Ctrl+V tugmalaridan foydalaning.'); }
-    });
-    async function copyResult() {
-      if (!result.value) { showToast('Avval matn kiriting'); return; }
-      try {
-        if (navigator.clipboard?.writeText) { await navigator.clipboard.writeText(result.value); }
-        else throw Error('clipboard unavailable');
-      } catch {
-        result.focus(); result.select();
-        try {
-          if (!document.execCommand('copy')) throw Error('copy failed');
-        } catch { showToast('Natijani belgilab, Ctrl+C bilan nusxalang'); return; }
-      }
-      showToast('Natija nusxalandi ✓');
-    }
-    document.querySelector('#copy-btn').addEventListener('click', copyResult);
-    document.querySelector('#inline-copy-btn').addEventListener('click', copyResult);
-    document.querySelector('#download-btn').addEventListener('click', () => {
-      if (!result.value) { showToast('Avval matn kiriting'); return; }
-      const file = new Blob(['\uFEFF', result.value], {type:'text/plain;charset=utf-8'});
-      const url = URL.createObjectURL(file);
-      const link = document.createElement('a');
-      link.href = url; link.download = 'yangi-alifbo.txt';
-      document.body.appendChild(link); link.click(); link.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-      showToast('Matn fayli tayyor');
-    });
-    document.querySelectorAll('[data-example]').forEach(btn => btn.addEventListener('click', () => {
-      source.value = samples[mode][Number(btn.dataset.example)-1];
-      render(); source.focus();
-    }));
-    render();
-  </script>
+  <script type="module" src="./src/main.js"></script>
 </body>
 </html>

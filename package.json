@@ -1,0 +1,24 @@
+{
+  "name": "uzbek-alifbo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22.13.0" },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "preview": "vite preview",
+    "test": "cargo test --locked",
+    "test:browser": "playwright test"
+  },
+  "dependencies": {
+    "@pdf-lib/fontkit": "1.1.1",
+    "@xmldom/xmldom": "0.9.12",
+    "@zip.js/zip.js": "2.25.0",
+    "pdf-lib": "1.17.1",
+    "pdfjs-dist": "6.5.438"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.1",
+    "vite": "8.3.8"
+  }
+}

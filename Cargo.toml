@@ -1,0 +1,17 @@
+[package]
+name = "alifbo"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+path = "converter/src/lib.rs"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+wasm-bindgen = "=0.2.105"
+
+[profile.release]
+lto = true
+opt-level = "s"
+strip = true
