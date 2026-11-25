@@ -40,3 +40,10 @@ el('source').oninput=update;
 el('direction').onchange=()=>{update();start()};
 el('suggest').onclick=()=>{el('direction').value='cyrillic';update();start()};
 init().then(()=>{ready=true;update()}).catch(()=>{el('result').placeholder='Konverter yuklanmadi. Sahifani yangilang.'});
+
+if (location.hostname === 'neruinmycode.github.io') {
+  const beacon = document.createElement('script');
+  beacon.src = 'https://static.cloudflareinsights.com/beacon.min.js';
+  beacon.dataset.cfBeacon = JSON.stringify({ token: '8fb8704a75e34fa4a5924bab9a20e2f3' });
+  document.head.append(beacon);
+}
