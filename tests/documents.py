@@ -164,7 +164,7 @@ def check_package(source, target, allowed_changes):
                 assert original.read(name) == result.read(name), name
 
 
-def verify(directory, output, layout=None):
+def verify_office(directory, output):
     docx = Document(output / "hisobot-alifbo.docx")
     paragraph = docx.paragraphs[0]
     assert paragraph.text == "Şahar"
@@ -215,6 +215,9 @@ def verify(directory, output, layout=None):
     assert slide.shapes[3].image.content_type == "image/png"
     check_package(directory / "taqdimot.pptx", pptx, {"ppt/slides/slide1.xml"})
 
+
+def verify(directory, output, layout=None):
+    verify_office(directory, output)
     pdf = output / "matn-alifbo.pdf"
     text = subprocess.check_output(["pdftotext", pdf, "-"], text=True)
     assert "OʻZBEKISTON, Gʻuzor, Shahar, CHIROQ." in text
@@ -250,4 +253,4 @@ def verify(directory, output, layout=None):
 
 if __name__ == "__main__":
     action, *paths = sys.argv[1:]
-    {"generate": generate, "verify": verify}[action](*map(Path, paths))
+    {"generate": generate, "verify": verify, "verify-office": verify_office}[action](*map(Path, paths))
